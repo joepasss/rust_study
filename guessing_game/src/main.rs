@@ -1,21 +1,40 @@
-use std::io;    // to obtain user input and then print the result as output "io" input/output libray into scope, "io" library comes from the standard library, known as std:
+use rand::Rng;
+use std::cmp::Ordering;
+use std::io;
 
 fn main() {
     println!("Guess the number!");
 
-    println!("Please input your guess.");
+    let secret_number = rand::thread_rng().gen_range(1..=100);
 
-    let mut guess= String::new();   // new varialbe that mutable and has empty string value
+    // println!("The secret number is: {secret_number}"); for debug
 
-    io::stdin()
-        .read_line(&mut guess)      // & == references, so mutate variables
-        .expect("Failed to red line");                  // handling potential Failure with the Result type
-
-    println!("You guessed: {guess}");
+    loop {
+        println!("Please input your guess.");
+        
+        let mut guess= String::new();
+        
+        io::stdin()
+        .read_line(&mut guess)
+        .expect("Failed to red line");
+        
+        let guess: u32 = match guess.trim().parse() {
+            Ok(num) => num,
+            Err(_) => {
+                println!("Please input a number!");
+                continue;
+            },
+        };
+        
+        println!("You guessed: {guess}");
+        
+        match guess.cmp(&secret_number) {
+            Ordering::Less => println!("Too small!"),
+            Ordering::Greater => println!("Too big!"),
+            Ordering::Equal => {
+                println!("You win!");
+                break;
+            }
+        }
+    }
 }
-
-/*
-    Variables!
-    let apples = 5;         immutable
-    let mut bananas = 5;    mutable
-*/
