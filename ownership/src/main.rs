@@ -2,6 +2,12 @@ fn main() {
     println!("What is ownership");
     println!("------------------------------");
     what_is_ownership();
+
+    println!("");
+
+    println!("QUIZ");
+    println!("------------------------------");
+    quiz();
 }
 
 fn what_is_ownership() {
@@ -89,6 +95,74 @@ fn what_is_ownership() {
 
     // There is a natural point at which we can return the memory our String need to the allocator: whe s goes out of scope. Whe a variable goes out of scope, Rust calls a special function for us. This function called drop, and it's where the author of String can put the code to return the memory. Rust calls drop automatically at the closing curly bracket.
     
-        /*      Ways Variables and Data Interact: Move      */
+
+    /*      Ways Variables and Data Interact: Move      */
+    // Multiple variables can interact with the same data in different ways in Rust.
+    {
+        let x = 5;
+        let _y = x;
+
+        // bind the value 5 to x; then make a copy of the value in x and bind it to y;
+        // integers are simple values with a known, fixed size, and these two 5 values are pushed onto stack.
+
+        let s1 = String::from("Hello");
+        let _s2 = s1;
         
-} 
+        // a pointer to the memory that holds the contents of the string, a length, and a capacity. This group of data is stored on the stack. memory on the heap that holds the contents
+
+        // When we assign s1 to s2, the String data is copied, meaning we copy the pointer, the length, and the capacity that are on the stack. We do not copy the data on the heap that the pointer refers to.
+
+        // both data pointers pointing to the same location. when s2 and s1 go out of scope, they will both try to free the same memory. This is known as double free error and is one of the memory safety bugs we mentioned previously. Freeing memory twice can lead to memory corruption, which can potentially lead to security vulnerabilities.
+
+        // To ensure memory safety, after the line let s2 = s1, Rust considers s1 as no longer valid, Therefore, Rust doesn't need to free anything when s1 goes out of scope.
+
+        // the concept of coping the pointer, length, and capacity without copying the data probably sounds like making a shallow copy. But because Rust also invalidates the first variable, instead of calling it a shallow copy. It's known as a move.
+
+        // With only s2 valid, when it goes out of scope, it alone will free the memory
+        // Rust will never automatically create "deep" copies of your data. Therefore, any automatic copying can be assumed to be inexpensive in terms of runtime performance
+    }
+
+
+    /*      Ways Variables and Data Interact: Clone     */
+    // if we do want to deeply copy the data of the string, not just the stack data, we can use a common method called clone.
+    {
+        let s1 = String::from("hello");
+        let s2 = s1.clone();
+        
+        println!("s1 = {}, s2 = {}", s1, s2);
+
+        // When you se call to clone, you know that some arbitrary code being executed and that code may be expensive. It's a visual indicator that something different is going on.
+    }
+
+
+    /*      Stack-Only Data: Copy       */
+    {
+        let x = 5;
+        let y = x;
+
+        println!("x = {}, y = {}", x, y);
+
+        // that types such as integers that have a known size at compiler time are stored entires on the stack, so copies of the actual values are quick to make. That means there's no reason we would want to prevent x from being valid after we create the variable y. In other words, there's no difference between deep and shallow copying here, so calling clone wouldn't do anything different from the usual shallow copying and we can leave it out.
+
+        // some of the types that implement copy:
+        // All the integer types, such as u32.
+        // The boolean type, bool, with values true and false
+        // All the floating point types, such as f64
+        // the character type, char.
+        // Tuples, if they only contain types also implement Copy. (i32, i32) is but (i32, String) does not
+    }
+
+
+    /*      Ownership and Functions     */
+    
+}
+
+fn quiz() {
+    let a = {
+        let mut b = String::from("hello");
+        b.push_str(" world");
+        b
+    };
+
+    println!("{a}");
+}
