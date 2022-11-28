@@ -5,6 +5,12 @@ fn main() {
 
     println!("");
 
+    println!("References and Borrowing");
+    println!("------------------------------");
+    ref_and_borrowing();
+
+    println!("");
+
     println!("QUIZ");
     println!("------------------------------");
     quiz();
@@ -158,11 +164,135 @@ fn what_is_ownership() {
 }
 
 fn quiz() {
-    let a = {
-        let mut b = String::from("hello");
-        b.push_str(" world");
-        b
-    };
+    let mut s = String::from("hello");
+    let s2 = &s;
+    println!("{s2}");
 
-    println!("{a}");
+    let s3 = &mut s;
+    s3.push_str(" world");
+    println!("{s3}");
+    println!("{s}");
+}
+
+fn ref_and_borrowing() {
+    // The issue with the tuple code in Listing 4-5 is that we have to return the String to the calling function so we can still use the String after the call to calculate_length, because the String was moved into calculate_length. Instead, we can provide a reference to the String value. A reference is like a pointer in that it's and address we can follow to access the data stored at that address; that data is owned by some other variable. Unlike a pointer, a reference is guaranteed to point to a valid value of a particular type for the life of that reference.
+
+    fn calculate_length(s: &String) -> usize {
+        s.len()
+    }   // s goes out of scope. But because it does not have ownership of what it refers to, it is not dropped.
+
+    let s1 = String::from("hello");
+    let len = calculate_length(&s1);
+    // The &s1 syntax lets us create a reference that refers to the value of s1. but does not own it. Because it does not own it, the value it points to will not be dropped when the reference stops being used.
+
+    // Likewise, the signature of the functions uses & to indicate that the type of the parameter s is a reference.
+
+    println!("The length of '{}' is {}. ", s1, len);
+
+    // first notice that all the tuple code in the variable declaration and the function return value is gone. Second, not that we pass &s1 into calculate_length and, in its definition, we take &String rather than String. These ampersands represent references, and they allow you to refer to some value without taking ownership of it
+
+    // The opposite of referencing by using & is dereferencing, which is accomplished with the dereference operator, *.
+
+    // What happens if we try to modify something we're borrowing?
+    fn _change(_some_string: &String) {
+        // some_string.push_str(", world");
+        // `some_string` is a `&` reference, so the data it refers to cannot be borrowed as mutable
+    }
+    // Just as variables are immutable by default, so are references. We're not allowed to modify something we have a reference to.
+
+
+    /*          MUTABLE REFERENCES           */
+    // We can fix the code from _change function to allow us to modify a borrowed value with just a few small tweaks that use, instead, a mutable reference:
+    fn change_mut(some_string: &mut String) {
+        some_string.push_str(", world");
+    }
+
+    let mut s2 = String::from("hello");
+    change_mut(&mut s2);
+    println!("{}", s2);
+
+    // Mutable references have one big restriction: if you have mutable references to a value, you can have no other references to that value.
+
+    let r1 = &mut s2;
+    // ERROR
+    // let r2 = &mut s2;
+    // "second mutable borrow occurs here"
+
+    println!("{}", r1);
+
+    // we cannot borrow s2 as mutable more than once at a time. The first mutable borrow is in r1 and must last until it's used in the println!, but between in the creation of that mutable reference and its usage, we tried to create another mutable reference in r2 that borrows the same data as r1.
+
+    // The restriction preventing multiple mutable references to the same data at the same time allows for mutation but in very controlled fashion. It's something that new Rustaceans struggle with, because most languages let you mutate whenever you'd like. The benefit of having this restriction is that Rust can prevent data races at compile time. A data race is similar to a race condition and happens when these three behaviors occur:
+        
+        // Tow or more pointers access the same data at the same time.
+        // At least one of the pointers is begin use to write to the data.
+        // There's no mechanism being used to synchronize access to the data
+    
+    // Data races cause undefined behavior and can be difficult to diagnose and fix when you're trying to track them down at runtime;
+    // Rust prevents this problem by refusing to compile code with data races
+
+    // We can use curly brackets to create new scope, allowing for multiple mutable references, just not simultaneous ones:
+
+    let mut s3 = String::from("HELLO no3");
+
+    {
+        let _ref1 = &mut s3;
+    }
+
+    let _ref2 = &mut s3;
+
+    // Rust enforces a similar rule for combination mutable and immutable references.
+    /*
+    result in an error:
+
+    let mut s = String::from("Hello");
+
+    let r1 = &s;
+    let r2 = &s;
+    let r3 = &mut s;    // problem occurs
+    */
+
+
+    /*          IMPLICIT BORROWING          */
+    // Borrows and references are used everywhere in Rust. So to make Rust programs less verbose, the Rust compiler has a number of strategies for implicitly creating borrows and converting references
+    // mutable references can be moved by direct assignment
+    {
+        let mut s = String::from("Hello world");
+        let s2 = &mut s;
+        let _s3 = s2;
+
+        // println!("{}", s2); // not valid because s2 is moved
+    }
+
+    // but mutable references are not moved by function calls
+    {
+        fn consume(_s: &mut String) {}
+        let mut s = String::from("mutable references are not moved by function calls");
+        let s2 = &mut s;
+        consume(s2);
+        println!("{}", s2);
+
+        // this program works because Rust automatically reborrows mutable references when passed as input to a function call.
+        // That way, Rust programmers don't have to keep creating new mutable references on every call. Inside the complier the call to consume is transformed to look like this
+            // consume(&mut *s2);
+        // therefore s2 is not moved by consume, but rather borrowed by consume 
+    }
+
+
+    /*          Dangling References         */
+    // In language with pointers, it's easy to erroneously create a dangling pointer--a pointer that references a location in memory that may have been given to someone else--by freeing some memory while preserving a pointer to that memory. In Rust, by contrast, the compiler guarantees that references will never be dangling references: if you have a reference to some data, the compiler will ensure that the data will not go out of scope before the reference to the data does.
+    /*
+    {
+        let reference_to_nothing = dangle();
+        
+        fn dangle() -> &String {
+            let s = String::from("hello");
+            
+            &s  // created inside of function
+        }   // s goes out of scope, and is dropped. It memory goes away
+    }
+
+    this function's return type contains a borrowed value, but there is no value for it to be borrowed from
+
+    */
 }
