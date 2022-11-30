@@ -1,3 +1,5 @@
+use core::slice;
+
 fn main() {
     println!("What is ownership");
     println!("------------------------------");
@@ -8,6 +10,12 @@ fn main() {
     println!("References and Borrowing");
     println!("------------------------------");
     ref_and_borrowing();
+
+    println!("");
+
+    println!("The Slice Type");
+    println!("------------------------------");
+    slice_type();
 
     println!("");
 
@@ -295,4 +303,75 @@ fn ref_and_borrowing() {
     this function's return type contains a borrowed value, but there is no value for it to be borrowed from
 
     */
+}
+
+fn slice_type() {
+    // Slices let you reference a contiguous of elements in a collection rather than the whole collection. A slice is a kind of reference, so it does not have ownership.
+
+    // write a function that takes a string of words separated by spaces and returns the first word it finds in that string. If the function doesn't find a space in the string, the whole string must be one word, so the entire string should be returned.
+
+    // The first_word function has a &String as a parameter. We don't want ownership, so this is fine.
+    // But should we return? We don't really have a way to talk about part of a string. However, we could return the index of the end of the word, indicated by a space.
+    fn first_word(s: &String) -> usize {
+
+        // Because we need to go through the String element by element and check whether a value is a space, we'll convert our String to an array of bytes using the as_bytes() method:
+        let bytes = s.as_bytes();
+
+        // we create an iterator over the array of bytes using the iter method:
+        for(i, &item) in bytes.iter().enumerate() {
+            // iter is a method that returns each element in a collection and that enumerate wraps the result of iter and returns each element as part of a tuple instead.
+            // The first element of the tuple returned from enumerate is the index, and the second element is a reference to the element. This is a bit more convenient than calculating the index ourselves.
+            
+            if item == b' ' {
+                return i;
+            }
+        }
+
+        s.len()
+
+        // We now have a way to find out the index of the end of the first word in the string, but there's a problem. We're returning a usize on it's own, but it's only meaningful number in the context of the &String. In other words, because it's a separate value from the String, there's no guarantee that it will still be valid in the future.
+    }
+
+    let mut s1 = String::from("hello world");
+    let _word = first_word(&s1);  // word will get the value 5
+    s1.clear();  // this empties the String, making it equal to ""
+
+    // word still has the value 5 here, but there's no more string that
+    // we could meaningfully use the value 5 with. word is now totally invalid!
+
+    // This program compiles without any errors and would also do so if used word after calling s.clear(). Because word isn't connected to the state of s at all, word still contains the value 5.
+    // We could use that value 5 with the variable s to try to extract the first word out, but this would be a but because the contents of s have changed since we saved 5 in word.
+
+    // Having to worry about the index in word getting out of sync with the data in s is tedious and error prone! Managing these indices is even more brittle if we write a second_word function. Its signature would have to look like this:
+    // fn second_word(s: &String) -> (usize, usize) {}
+
+    // Now we're tracking a starting and an ending index, and we have even more values that were calculated from data in a particular state but aren't tied to that state at all. We have three unrelated variables floating around that need to be kept in sync.
+
+    // Luckily, Rust has a solution to this problem: string slices,
+
+
+    /*          String Slices           */
+    // A string slice is a reference to part of a String,
+    {
+        let s = String::from("Hello world");
+
+        let _hello: &str = &s[0..5]; // equal to &s[..5]
+        let _world: &str = &s[6..11];
+        let _s2: &String = &s;   // not a slice, for a comparison
+    }
+
+    // Rather than a reference to the entire String, hello is a reference to a portion of the String, specified in the extra [0..5] bit, We create slices using a range within brackets by specifying [starting_index..ending_index], where starting_index is the first position in the slice and ending_index is one more than the last position in the slice.
+    // Internally, the slice data structure stores the starting position and the length of the slice, which corresponds to ending_index minus starting_index. So in the case of let world = &s[6..11];, world would be a slice that contains a pointer to the byte at index 6 of s with a length value of 5.
+
+    {
+        let s = String::from("Hello");
+
+        let len = s.len();
+
+        let _slice1 = &s[1..len];
+        let _slice2 = &s[1..];
+
+        let _slice3 = &s[0..len];
+        let _slice4 = &s[..];
+    }
 }
