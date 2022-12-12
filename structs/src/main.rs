@@ -18,6 +18,12 @@ fn main() {
     structs_program();
     divider();
 
+    println!("\n");
+
+    println!("Method Syntax");
+    method_syntax();
+    divider();
+
 }
 
 fn divider() {
@@ -25,35 +31,25 @@ fn divider() {
 }
 
 fn quiz() {
-    #[derive(Debug)]
-    struct Rectangle {
-        width: u32,
-        height: u32,
-    }
 
-    let rect1 = Rectangle {
-        width: 30,
-        height: 50,
-    };
-
-    let a = area(&rect1);
-    
-    println!("{:?} {}", rect1, a);
-
-    fn area(rectangle: &Rectangle) -> u32 {
-        rectangle.width * rectangle.height
-    }
 }
 
 fn defining_and_instantiating() {
-    // define a struct
-
 struct User {
         active: bool,
         username: String,
         email: String,
         sign_in_count: u64,
     }
+
+    let user = User {
+        email: String::from("some_email@example.com"),
+        username: String::from("usernames"),
+        active: true,
+        sign_in_count: 1
+    };
+
+    println!("User structs active: {} username: {} email: {} sign_in_count: {}", user.active, user.username, user.email, user.sign_in_count);
 
     {
         let mut user1 = User {
@@ -172,5 +168,50 @@ fn structs_program() {
         println!("rect is {:?}", rect);
         println!("rect is {:#?}", rect);        // style the output
         dbg!(&rect);        // returns ownership of the expression's value
+    }
+}
+
+fn method_syntax() {
+    #[derive(Debug)]
+    struct Rectangle {
+        width: u32,
+        height: u32,
+    }
+
+    impl Rectangle {
+        fn area(&self) -> u32 {
+            self.width * self.height
+        }
+
+        fn can_hold(&self, other: &Rectangle) -> bool {
+            self.width > other.width && self.height > other.height
+        }
+
+        fn square(size: u32) -> Self {
+            Self {
+                width: size,
+                height: size,
+            }
+        }
+    }
+
+    {
+        
+        let rect1 = Rectangle {
+            width: 30,
+            height: 50,
+        };
+
+        let rect2 = Rectangle {
+            width: 20,
+            height: 30,
+        };
+
+        println!("The area of the rectangle is {} square pixels", rect1.area());
+        println!("Can rect1 hold rect2? {}", rect1.can_hold(&rect2));
+        
+        let square1 = Rectangle::square(32);
+
+        println!("square1: {:?}", square1);
     }
 }
