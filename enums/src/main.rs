@@ -16,6 +16,9 @@ fn main() {
 
     defining_an_enum();
     divider();
+
+    match_control_flow();
+    divider();
 }
 
 fn defining_an_enum() {
@@ -89,4 +92,31 @@ fn defining_an_enum() {
 
     let m = Message::Write(String::from("hello"));
     m.call();
+}
+
+fn match_control_flow () {
+    println!("the match control flow construct");
+
+    enum Coin {
+        Penny,
+        Nickel,
+        Dime,
+        Quarter,
+    }
+
+    fn value_in_cents(coin: Coin) -> u8 {
+        match coin {
+            Coin::Penny => {
+                println!("Lucky penny!");
+                1
+            },
+            Coin::Nickel => 5,
+            Coin::Dime => 10,
+            Coin::Quarter => 25,
+        }
+    }
+
+    let nickel = Coin::Nickel;
+    let nickel_value = value_in_cents(nickel);
+    println!("{:?}", nickel_value);
 }
