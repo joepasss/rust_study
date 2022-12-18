@@ -1,24 +1,15 @@
 use std::io;
 
 fn main() {
+    println!("Enter your weight! (kg): ");
     let mut input = String::new(); // owned by input variable (heap)
 
-    io::stdin().read_line(&mut input);
+    io::stdin().read_line(&mut input).unwrap();
 
-    borrow_string(&input);
-    own_string(input);
-
-    // println!("input: {}", input);
-    // let mars_weight: f32 = calculate_weight_on_mars(100.0);
-    // println!("Weight on Mars: {}kg", mars_weight);
-}
-
-fn borrow_string(s: &String) {
-    println!("{}", s);
-}
-
-fn own_string(s: String) {
-    println!("{}", s);
+    let weight: f32 = input.trim().parse().unwrap();
+    dbg!(weight);
+    let mars_weight: f32 = calculate_weight_on_mars(weight);
+    println!("Weight on Mars: {}kg", mars_weight);
 }
 
 fn calculate_weight_on_mars(weight: f32) -> f32 {
