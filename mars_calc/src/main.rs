@@ -10,6 +10,9 @@ fn main() {
     println!("{}", b);
     */
 
+    some_fn(&s);
+    some_mut_fn(&mut s);
+
     io::stdin().read_line(&mut s);
     let mars_weight: f32 = calculate_weight_on_mars(100.0);
     println!("Weight on Mars: {}kg", mars_weight);
@@ -26,3 +29,9 @@ fn calculate_weight_on_mars(weight: f32) -> f32 {
 // 2. When the owner goes out of scope, the value will be deallocated.
 
 // 3. There can only be ONE owner at a time.
+
+fn some_fn(s: &String) {} // function expect reference   (borrow)
+                          // reference is immutable for default
+                          // it can be used attaching "mut" keyword
+
+fn some_mut_fn(s: &mut String) {}
