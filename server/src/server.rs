@@ -1,4 +1,4 @@
-use std::net::TcpListener;
+use std::{io::Read, net::TcpListener};
 
 pub struct Server {
     addr: String,
@@ -16,8 +16,10 @@ impl Server {
 
         loop {
             match listener.accept() {
-                Ok((stream, _)) => {
-                    println!("OK");
+                Ok((mut stream, _)) => {
+                    let mut buffer = [0; 1024];
+
+                    stream.read(&mut buffer);
                 }
                 Err(e) => println!("{}", e),
                 // _ => println!("DEFAULT"),
