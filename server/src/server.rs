@@ -13,5 +13,12 @@ impl Server {
         println!("Server running in {}", self.addr);
 
         let listener = TcpListener::bind(&self.addr).unwrap();
+
+        loop {
+            // == while true {}
+            continue;
+
+            break;
+        }
     }
 }
