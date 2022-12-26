@@ -1,5 +1,5 @@
 use crate::http::Request;
-use std::{convert::TryFrom, io::Read, net::TcpListener};
+use std::{convert::TryFrom, convert::TryInto, io::Read, net::TcpListener};
 
 pub struct Server {
     addr: String,
@@ -24,7 +24,8 @@ impl Server {
                         Ok(_) => {
                             println!("Received a request: {}", String::from_utf8_lossy(&buffer));
 
-                            Request::try_from(&buffer as &[u8]);
+                            Request::try_from(&buffer[..]);
+                            let res: &Result<Request, _> = &buffer[..].try_into();
                         }
                         Err(e) => println!("Failed to read from connection: {}", e),
                     }
