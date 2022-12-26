@@ -19,10 +19,14 @@ impl Server {
                 Ok((mut stream, _)) => {
                     let mut buffer = [0; 1024];
 
-                    stream.read(&mut buffer);
+                    match stream.read(&mut buffer) {
+                        Ok(_) => {
+                            println!("Received a request: {}", String::from_utf8_lossy(&buffer))
+                        }
+                        Err(e) => println!("Failed to read from connection: {}", e),
+                    }
                 }
                 Err(e) => println!("{}", e),
-                // _ => println!("DEFAULT"),
             }
         }
     }
