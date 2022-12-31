@@ -3,6 +3,7 @@ use std::{
     convert::TryFrom,
     error::Error,
     fmt::{Debug, Display, Formatter, Result as FmtResult},
+    str,
     str::Utf8Error,
 };
 
@@ -23,6 +24,7 @@ impl TryFrom<&[u8]> for Request {
 
     fn try_from(buf: &[u8]) -> Result<Self, Self::Error> {
         let request = str::from_utf8(buf)?;
+        unimplemented!();
     }
 }
 
