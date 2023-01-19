@@ -1,3 +1,4 @@
+use super::http::{response::Response, status_code::StatusCode};
 use std::{io::Read, net::TcpListener};
 
 pub struct Server {
@@ -21,6 +22,13 @@ impl Server {
                     match stream.read(&mut buffer) {
                         Ok(_) => {
                             println!("Received a request: {}", String::from_utf8_lossy(&buffer));
+
+                            let response = Response::new(
+                                StatusCode::Ok,
+                                Some("<h1>HELLO!!!</h1>".to_string()),
+                            );
+
+                            response.send(&mut stream);
                         }
 
                         Err(e) => println!("Failed to read from connection: {}", e),
