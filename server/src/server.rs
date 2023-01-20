@@ -1,8 +1,21 @@
-use super::http::{response::Response, status_code::StatusCode};
+use super::http::{
+    request::{ParseError, Request},
+    response::Response,
+    status_code::StatusCode,
+};
 use std::{io::Read, net::TcpListener};
 
 pub struct Server {
     addr: String,
+}
+
+pub trait Handler {
+    fn handle_request(&mut self, request: &Request) -> Response;
+
+    fn handle_bad_request(&mut self, e: &ParseError) -> Response {
+        println!("Failed to parse request: {}", e);
+        Response::new(StatusCode::BadRequest, None)
+    }
 }
 
 impl Server {
@@ -10,7 +23,7 @@ impl Server {
         Self { addr }
     }
 
-    pub fn run(self) {
+    pub fn run(self, mut handler: impl Handler) {
         println!("Server running in {}", self.addr);
         let listener = TcpListener::bind(&self.addr).unwrap();
 
@@ -23,9 +36,14 @@ impl Server {
                         Ok(_) => {
                             println!("Received a request: {}", String::from_utf8_lossy(&buffer));
 
-                            let response = Response::new(StatusCode::Ok, Some("{}".to_string()));
+                            let response = match Request::try_from(&buffer[..]) {
+                                Ok(request) => handler.handle_request(&request),
+                                Err(e) => handler.handle_bad_request(&e),
+                            };
 
-                            response.send(&mut stream);
+                            if let Err(e) = response.send(&mut stream) {
+                                println!("Failed to send response: {}", e);
+                            }
                         }
 
                         Err(e) => println!("Failed to read from connection: {}", e),
