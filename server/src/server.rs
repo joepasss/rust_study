@@ -23,10 +23,7 @@ impl Server {
                         Ok(_) => {
                             println!("Received a request: {}", String::from_utf8_lossy(&buffer));
 
-                            let response = Response::new(
-                                StatusCode::Ok,
-                                Some("<h1>HELLO!!!</h1>".to_string()),
-                            );
+                            let response = Response::new(StatusCode::Ok, Some("{}".to_string()));
 
                             response.send(&mut stream);
                         }
