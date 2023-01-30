@@ -1,16 +1,16 @@
-// SMART POINTERS
-// additional row pointer wrapper
-
 fn main() {
     let a = 2;
-    stack_only(a);
+    let result = stack_only(a);
+    dbg!(result);
 }
 
-fn stack_only(i32 b) {
+fn stack_only(b: i32) -> i32 {
     let c = 3;
+    return b + c + stack_and_heap();
 }
 
-fn stack_and_heap(i32 a) {
+fn stack_and_heap() -> i32 {
     let d = 5;
-    // SOME HEAP VAR V      // if "stack_and_heap" function is end, deallocated automatically (smart pointer)
+    let e = Box::new(7);
+    return d + *e;
 }
