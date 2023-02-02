@@ -1,3 +1,27 @@
 fn main() {
     println!("Hello, world!");
 }
+
+fn gcd(mut n: u64, mut m: u64) -> u64 {
+    assert!(n != 0 && m != 0);
+
+    while m != 0 {
+        if m < n {
+            let t = m;
+            m = n;
+            n = t;
+        }
+
+        m = m % n;
+    }
+
+    n
+}
+
+// cargo test 명령으로 실행 가능하다
+#[test]
+fn text_gcd() {
+    assert_eq!(gcd(14, 15), 1);
+
+    assert_eq!(gcd(2 * 3 * 5 * 11 * 17, 3 * 7 * 11 * 13 * 19), 3 * 11);
+}
